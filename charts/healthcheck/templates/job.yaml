@@ -1,0 +1,30 @@
+{{- if .Values.ingress.mtls.cronjob -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "healthcheck.fullname" . }}-renewal
+spec:
+  schedule: "0 0 */7 * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: client-certificate
+            secret:
+            secretName: {{ include "healthcheck.fullname" . }}-client
+          containers:
+          - name: hello
+            image: curlimages/curl
+            imagePullPolicy: IfNotPresent
+            command:
+            - curl
+            - -k
+            - -F 'cert=@/var/secrets/certs/tls.crt' 
+            - -F 'key=@/var/secrets/certs/tls.key'
+            - "https://asper-get-hmac.free.beeceptor.com"
+            volumeMounts:
+            - name: client-certificate
+              mountPath: /var/secrets/certs
+          restartPolicy: OnFailure
+{{- end -}}

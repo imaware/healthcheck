@@ -1,0 +1,65 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "healthcheck.fullname" . }}
+  labels:
+    {{- include "healthcheck.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    kubernetes.io/ingress.class: "nginx"    
+    cert-manager.io/issuer: "letsencrypt-prod"
+    {{- if .Values.ingress.mtls.enabled }}
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: {{ .Values.ingress.mtls.verify }}
+    nginx.ingress.kubernetes.io/auth-tls-secret: {{ .Release.Namespace }}/{{ template "healthcheck.fullname" . }}-client
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    {{- end }}
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.serviceSubDomain }}{{ .Values.clusterFQDN }}
+    secretName: {{ include "healthcheck.fullname" . }}-cert
+  rules:
+  - host: {{ .Values.serviceSubDomain }}{{ .Values.clusterFQDN }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "healthcheck.fullname" . }}
+            port:
+              number: 80
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "healthcheck.fullname" . }}
+spec:
+  secretName: {{ include "healthcheck.fullname" . }}-cert
+  dnsNames:
+  - {{ .Values.serviceSubDomain }}{{ .Values.clusterFQDN }}
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+{{- if .Values.ingress.mtls.enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "healthcheck.fullname" . }}-client
+spec:
+  secretName: {{ include "healthcheck.fullname" . }}-client
+  issuerRef:
+    name: ca-issuer
+    kind: ClusterIssuer
+  duration: {{ .Values.ingress.mtls.duration }}
+  renewBefore: {{ .Values.ingress.mtls.renewBefore }}
+  subject:
+    organizations:
+      - imaware
+  dnsNames:
+    - {{ .Values.ingress.mtls.dnsName | default "dev.imaware.develop.lab" }}
+{{- end -}}
+{{- end }}

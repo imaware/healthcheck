@@ -1,0 +1,14 @@
+name: "Create a change ticket"
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  analyze:
+    uses: imaware/workflows/.github/workflows/change-ticket.yaml@main
+    secrets:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}

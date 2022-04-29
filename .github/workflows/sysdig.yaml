@@ -1,0 +1,20 @@
+name: Scan container images for known vulnerabilities
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ prod ]
+  schedule:
+    - cron: '45 21 * * *'
+
+jobs:
+  scan:
+    uses: imaware/workflows/.github/workflows/sysdig-analysis.yaml@main
+    with:
+      tag: healthcheck:latest
+    secrets:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      SYSDIG_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}

@@ -1,0 +1,60 @@
+name: Test Dependency
+on:
+  push:
+    branches:
+      - renovate/*
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v2.4.0
+      - id: npm-setup
+        uses: actions/setup-node@v2.5.1
+        with:
+          node-version: '14'
+      - id: audit
+        run: yarn audit --groups dependencies
+  test:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v2.4.0
+      # Setup gcloud CLI
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          workload_identity_provider: 'projects/226341550395/locations/global/workloadIdentityPools/gh-actions-pool-develop/providers/gh-actions-develop-provider'
+          service_account: 'gh-develop-oidc-sa@imaware-test.iam.gserviceaccount.com'
+
+      # Setup gcloud CLI
+      - name: Set up GCP Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: actions/setup-node@v2.5.1
+        with:
+          node-version: '14.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v2.1.7
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn- 
+      - id: install
+        run: yarn install --frozen-lockfile
+      - id: lint
+        run: yarn lint
+      - id: build
+        run: yarn build
+      - id: test
+        run: yarn test
