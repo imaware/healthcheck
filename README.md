@@ -1,47 +1,75 @@
 # Imaware Healthcheck
 
-## Installation
+Reuseable healthcheck package to be used by fastify servers and express servers.
+
+## Default endpoints
+
+- GET `/healthcheck` - default healthcheck is API up
+- GET `/healthcheck/startz` - default healthcheck is API up
+- GET `/healthcheck/readyz` - healthcheck is API up and are dependencies up
+
+## Usage
+
+### Installation
 
 ```bash
 yarn add @imaware/healthcheck
 ```
 
-### Usage
+#### API Dependencies
 
-```ts
-import { healthcheck } from '@imaware/healthcheck';
+  ```typescript
+  const dependencies = {
+    serviceHealthcheck: 'http://service.healthcheck',
+    serviceStart: 'http://service.start',
+    serviceReady: 'http://service.ready',
+  };
+  ```
 
-export default class HealthCheckHandler extends BaseRouteHandler {
-  constructor(app: Application) {
-    super();
-    app.get('/healthcheck', this.handle.bind(this));
+#### Fastify Usage
+
+  ```typescript
+  import { healthcheck }  from '@imaware/healthcheck';
+
+  const RouteHandlers = [HealthCheckHandler];
+
+  export default fp(async (app: FastifyInstance) => {
+    for (const routeHandler of RouteHandlers) {
+      new routeHandler(app);
+    }
+
+    /* Pass in app and name of service or API
+    * app: FastifyInstance
+    * opts: { name: string }
+    */
+    healthcheck(app, dependencies);
+  });
+  ```
+
+#### Express Usage
+
+  ```typescript
+  import { healthcheck }  from '@imaware/healthcheck';
+
+  // route handlers
+  for (const routeHandler of RouteHandlers) {
+    new routeHandler(app);
   }
 
-  async handle(req: Request, resp: Response): Promise<void> {
-    const healthCheck = await healthcheck('lab-api'); // pass in API name above
-    resp.status(200).send(healthCheck);
-  }
-}
-```
+  /* Pass in app and name of service or API
+  * app: express.Application
+  * opts: { name: string }
+  */
+  healthcheck(app, dependencies);
+  ```
 
-### APIs dependencies
+#### API has no additional dependencies
 
-- [partner-api](https://github.com/imaware/partner-api)
-  - fhir
-  - order-tracking-api
-- [lab-api](https://github.com/imaware/lab-api)
-  - fhir
-  - order-tracking-api
-- [order-tracking-api](https://github.com/imaware/order-tracking-api)
-  - fhir
-  - result-interpretation-api
-  - email-service
-- [imaware-result-intepretation-api](https://github.com/imaware/imaware-result-intepretation-api)
-  - fhir
-- [imaware-email-service](https://github.com/imaware/imaware-email-service)
-  - fhir
-- [pdf-generator-api](https://github.com/imaware/pdf-generator-api)
-  - fhir
+  ```typescript
+  import { healthcheck }  from '@imaware/healthcheck';
+
+  healthcheck(app);
+  ```
 
 ### Credits
 

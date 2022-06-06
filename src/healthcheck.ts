@@ -1,16 +1,20 @@
-/* eslint-disable no-await-in-loop */
-import { getDependencies } from './dependencies/getDependencies';
+/* eslint-disable dot-notation */
+import { FastifyInstance } from 'fastify';
+import { Application } from 'express';
+import { fastifyHealthcheck } from './fastify';
+import { expressHealthcheck } from './express';
+import { dependenciesAccessor } from './accessors';
+import { HealthcheckDependencies } from './libs/types';
 
-export const healthcheck = async (apiName: string) => {
-  try {
-    const serviceDependencies = getDependencies(apiName);
+export const healthcheck = (app: FastifyInstance | Application, options: HealthcheckDependencies = {}) => {
+  // set dependencies
+  dependenciesAccessor.setDependencies(options);
 
-    for (const dependency of serviceDependencies) {
-      await dependency();
-    }
-
-    return { ok: true };
-  } catch (err) {
-    return { ok: false };
+  if ((app as unknown as FastifyInstance).addHook !== undefined) {
+    fastifyHealthcheck(app as FastifyInstance, {});
+  } else if ((app as unknown as Application).engine !== undefined) {
+    expressHealthcheck(app as Application);
+  } else {
+    throw new Error('Healthcheck server must be instance of Fastify or Express.');
   }
 };

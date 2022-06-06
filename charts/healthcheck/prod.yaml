@@ -1,0 +1,25 @@
+env:
+  NODE_ENV: production
+  LOG_LEVEL: 'INFO'
+
+
+serviceSubDomain: "healthcheck"
+clusterFQDN: ".prod.imaware.dev"
+
+iamServiceAccount:
+  create: false
+  project: imaware-prod
+  polices:
+
+
+image:
+  repository: gcr.io/imaware-prod/healthcheck
+
+ingress:
+  enabled: true
+  mtls:
+    enabled: false
+    duration: 4380h0m0s
+    renewBefore: 2190h0m0s
+    cronjob: false
+    verify: "optional"
