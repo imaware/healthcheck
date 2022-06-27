@@ -4,11 +4,11 @@ import { Application } from 'express';
 import { fastifyHealthcheck } from './fastify';
 import { expressHealthcheck } from './express';
 import { dependenciesAccessor } from './accessors';
-import { HealthcheckDependencies } from './libs/types';
+import { HealthcheckOptions } from './libs/types';
 
-export const healthcheck = (app: FastifyInstance | Application, options: HealthcheckDependencies = {}) => {
+export const healthcheck = (app: FastifyInstance | Application, options: HealthcheckOptions = {}) => {
   // set dependencies
-  dependenciesAccessor.setDependencies(options);
+  dependenciesAccessor.setDependencies(options?.dependencies || {});
 
   if ((app as unknown as FastifyInstance).addHook !== undefined) {
     fastifyHealthcheck(app as FastifyInstance, {});

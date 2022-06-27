@@ -19,10 +19,12 @@ yarn add @imaware/healthcheck
 #### API Dependencies
 
   ```typescript
-  const dependencies = {
-    serviceHealthcheck: 'http://service.healthcheck',
-    serviceStart: 'http://service.start',
-    serviceReady: 'http://service.ready',
+  const options = {
+    dependencies: {
+      serviceHealthcheck: 'http://service.healthcheck',
+      serviceStart: 'http://service.start',
+      serviceReady: 'http://service.ready',
+    },
   };
   ```
 
@@ -34,10 +36,6 @@ yarn add @imaware/healthcheck
   const RouteHandlers = [HealthCheckHandler];
 
   export default fp(async (app: FastifyInstance) => {
-    for (const routeHandler of RouteHandlers) {
-      new routeHandler(app);
-    }
-
     /* Pass in app and name of service or API
     * app: FastifyInstance
     * opts: { name: string }
@@ -50,11 +48,6 @@ yarn add @imaware/healthcheck
 
   ```typescript
   import { healthcheck }  from '@imaware/healthcheck';
-
-  // route handlers
-  for (const routeHandler of RouteHandlers) {
-    new routeHandler(app);
-  }
 
   /* Pass in app and name of service or API
   * app: express.Application
@@ -69,6 +62,49 @@ yarn add @imaware/healthcheck
   import { healthcheck }  from '@imaware/healthcheck';
 
   healthcheck(app);
+  ```
+
+#### Example responses
+
+Response for `/healthcheck`
+
+  ```json
+  { "ok": true }
+  ```
+
+Response for `/healthcheck/readyz`
+
+  ```json
+  { "ok": true }
+  ```
+
+Response for `/healthcheck/startz` with dependencies
+
+  ```json
+  { "ok": true, "message": "Healthcheck success for service" }
+  ```
+
+Response for `/healthcheck/startz` without dependencies
+
+  ```json
+  { "ok": true, "message": "Healthcheck success" }
+  ```
+
+### Options
+
+`dependencies`
+
+By default this is not required. You can pass in JSON object as API name (key) and API URI (value).
+Healthcheck will check each dependency to check if service is up.
+
+```typescript
+  const options = {
+    dependencies: {
+      serviceHealthcheck: 'http://service.healthcheck',
+      serviceStart: 'http://service.start',
+      serviceReady: 'http://service.ready',
+    },
+  };
   ```
 
 ### Credits

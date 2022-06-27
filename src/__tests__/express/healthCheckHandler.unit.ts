@@ -1,5 +1,5 @@
 import { Application, Request, Response } from 'express';
-import DependenciesAccessor from '../../accessors/DependenciesAccessor';
+import { dependenciesAccessor } from '../../accessors';
 import ReadyRouteHandler from '../../express/routeHandlers/ReadyRouteHandler';
 import StartRouteHandler from '../../express/routeHandlers/StartRouteHandler';
 import { getFakeApplication, getFakeResponse } from './Express.util';
@@ -51,7 +51,7 @@ describe('Route GET /healthcheck', () => {
   });
 
   it('provides a StartRouteHandler response', async () => {
-    DependenciesAccessor.prototype.checkDependencies = jest.fn(() => Promise.resolve());
+    dependenciesAccessor.checkDependencies = jest.fn().mockRejectedValue(new Error('healthchecks failed for API'));
     const startRouteHandler = new StartRouteHandler(app);
 
     await startRouteHandler.handle(req, resp);
@@ -61,6 +61,7 @@ describe('Route GET /healthcheck', () => {
 
     // Extract the sent payload
     const outputObject = (resp.send as Mock).mock.calls[0][0];
-    expect(outputObject.ok).toEqual(true);
+    expect(outputObject.ok).toEqual(false);
+    expect(outputObject.message).toEqual('healthchecks failed for API');
   });
 });

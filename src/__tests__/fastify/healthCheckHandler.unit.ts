@@ -1,4 +1,5 @@
 import Fastify, { FastifyInstance } from 'fastify';
+import { dependenciesAccessor } from '../../accessors';
 import { Routes } from '../../fastify/routes';
 
 describe('Route GET /healthcheck', () => {
@@ -40,5 +41,16 @@ describe('Route GET /healthcheck', () => {
 
     expect(reply.statusCode).toBe(200);
     expect(reply.body).toEqual(JSON.stringify({ ok: true }));
+  });
+
+  it('throws an error for /healthCheck/startz response', async () => {
+    dependenciesAccessor.checkDependencies = jest.fn().mockRejectedValue(new Error('healthchecks failed for API'));
+    const reply = await app.inject({
+      method: 'GET',
+      url: '/healthcheck/startz',
+    });
+
+    expect(reply.statusCode).toBe(500);
+    expect(reply.body).toEqual(JSON.stringify({ ok: false, message: 'healthchecks failed for API' }));
   });
 });

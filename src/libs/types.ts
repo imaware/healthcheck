@@ -4,11 +4,10 @@ import { HttpError } from 'http-errors';
 
 export type ApiError = HttpError | Error;
 
-export interface IRouteHandler {
-  handle?(req: FastifyRequest, reply: FastifyReply): void;
-  errorHandler(reply: FastifyReply, err: Error, statusCode: number): void;
+export interface HealthCheckDependencies {
+  [key: string]: string;
 }
 
-export interface HealthcheckDependencies {
-  [key: string]: string;
+export interface HealthcheckOptions {
+  dependencies?: HealthCheckDependencies;
 }

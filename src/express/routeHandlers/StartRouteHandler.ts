@@ -1,7 +1,6 @@
 import { Application, Request, Response } from 'express';
 import { dependenciesAccessor } from '../../accessors';
 import logger from '../../libs/logger';
-import { ApiError } from '../../libs/types';
 import BaseRouteHandler from '../../routeHandlers/BaseRouteHandler';
 
 /**
@@ -20,11 +19,12 @@ export default class StartRouteHandler extends BaseRouteHandler {
 
   handle = async (req: Request, reply: Response): Promise<void> => {
     try {
-      await dependenciesAccessor.checkDependencies();
-      reply.status(this.successCode).send(this.healthCheckResponse);
+      const message = await dependenciesAccessor.checkDependencies();
+      reply.status(this.successCode).send({ ...this.healthCheckResponse, message });
     } catch (err) {
-      logger.error('Error in StartRouteHandler.handle.');
-      this.errorHandler(reply, err as ApiError);
+      const message = (err as Error).message;
+      logger.error(`Error in StartRouteHandler.handle. [message: ${message}]`);
+      reply.status(this.errorStatusCode).send({ ok: false, message });
     }
   };
 }

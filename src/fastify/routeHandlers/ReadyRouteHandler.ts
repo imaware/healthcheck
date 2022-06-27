@@ -1,7 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import logger from '../../libs/logger';
 import BaseRouteHandler from '../../routeHandlers/BaseRouteHandler';
-import { ApiError } from '../../libs/types';
 
 /**
  * Will be constantly hit.
@@ -21,7 +20,7 @@ export default class ReadyRouteHandler extends BaseRouteHandler {
       reply.status(this.successCode).send(this.healthCheckResponse);
     } catch (err) {
       logger.error('Error in ReadyRouteHandler.handle.');
-      this.errorHandler(reply, err as ApiError);
+      reply.status(this.errorStatusCode).send(this.failedHealthCheckResponse);
     }
   };
 }

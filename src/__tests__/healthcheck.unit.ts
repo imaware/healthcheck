@@ -1,9 +1,9 @@
-import axios from 'axios';
 import express from 'express';
 import fastify from 'fastify';
 import request, { Response } from 'supertest';
+import { dependenciesAccessor } from '../accessors';
 import { healthcheck } from '../healthcheck';
-import { HealthcheckDependencies } from '../libs/types';
+import { HealthcheckOptions } from '../libs/types';
 
 jest.mock('axios');
 
@@ -11,14 +11,17 @@ describe('healthcheck.ts', () => {
   const healthcheckUri = '/healthcheck';
   const healthcheckReadyUri = '/healthcheck/readyz';
   const healthcheckStartUri = '/healthcheck/startz';
-  const dependencies: HealthcheckDependencies = {
-    serviceHealthcheck: 'http://service.healthcheck',
-    serviceStart: 'http://service.start',
-    serviceReady: 'http://service.ready',
+  const dependencies: HealthcheckOptions = {
+    dependencies: {
+      serviceHealthcheck: 'http://service.healthcheck',
+      serviceStart: 'http://service.start',
+      serviceReady: 'http://service.ready',
+    },
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    dependenciesAccessor.checkDependencies = jest.fn();
   });
 
   it('test fastify application with /healthcheck', async () => {
@@ -61,11 +64,10 @@ describe('healthcheck.ts', () => {
 
     expect(reply.statusCode).toBe(200);
     expect(reply.body).toEqual(JSON.stringify({ ok: true }));
-    expect(axios.get).toBeCalledTimes(3);
   });
 
   it('test error thrown with /healthcheck/startz', async () => {
-    axios.get = jest.fn().mockRejectedValue(new Error('throw err'));
+    dependenciesAccessor.checkDependencies = jest.fn().mockRejectedValue(new Error('healthchecks failed for API'));
     const app = fastify();
     healthcheck(app, dependencies);
     await app.ready();
@@ -76,7 +78,7 @@ describe('healthcheck.ts', () => {
     });
 
     expect(reply.statusCode).toBe(500);
-    expect(reply.body).toEqual(JSON.stringify({ ok: false, errorMessage: 'Internal Server Error' }));
+    expect(reply.body).toEqual(JSON.stringify({ ok: false, message: 'healthchecks failed for API' }));
   });
 
   it('test express application with /healthcheck', done => {
@@ -120,13 +122,12 @@ describe('healthcheck.ts', () => {
           done(err);
         }
         expect(res.body.ok).toEqual(true);
-        expect(axios.get).toBeCalledTimes(3);
         done();
       });
   });
 
   it('test express app error thrown with /healthcheck/startz', done => {
-    axios.get = jest.fn().mockRejectedValue(new Error('throw err'));
+    dependenciesAccessor.checkDependencies = jest.fn().mockRejectedValue(new Error('healthchecks failed for API'));
     const app = express();
     healthcheck(app, dependencies);
     request(app)
@@ -136,7 +137,7 @@ describe('healthcheck.ts', () => {
         if (err) {
           done(err);
         }
-        expect(res.body).toEqual({ ok: false, errorMessage: 'Internal Server Error' });
+        expect(res.body).toEqual({ ok: false, message: 'healthchecks failed for API' });
         done();
       });
   });

@@ -1,6 +1,5 @@
 import { Application, Request, Response } from 'express';
 import logger from '../../libs/logger';
-import { ApiError } from '../../libs/types';
 import BaseRouteHandler from '../../routeHandlers/BaseRouteHandler';
 
 /**
@@ -29,7 +28,7 @@ export default class ReadyRouteHandler extends BaseRouteHandler {
       reply.status(this.successCode).send(this.healthCheckResponse);
     } catch (err) {
       logger.error('Error in ReadyRouteHandler.handle.');
-      this.errorHandler(reply, err as ApiError);
+      reply.status(this.errorStatusCode).send(this.failedHealthCheckResponse);
     }
   };
 }
