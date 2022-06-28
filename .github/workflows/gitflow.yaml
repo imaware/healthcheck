@@ -1,0 +1,26 @@
+name: Develop <-> Staging Gitflow
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [promote_develop]
+
+  
+jobs:
+  syncStage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout staging
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: 'staging'
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - id: merge
+        name: Merge develop into staging
+        run: |
+          git remote update
+          git config --global user.name "bloodbot"
+          git fetch origin develop:develop
+          git merge develop
+          git push

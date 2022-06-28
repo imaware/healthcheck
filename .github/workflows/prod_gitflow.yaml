@@ -1,0 +1,25 @@
+name: Staging <-> Prod Gitflow
+
+on:
+  repository_dispatch:
+    types: [promote_staging]
+  workflow_dispatch:
+  
+jobs:
+  syncProd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout prod
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: 'prod'
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - id: merge
+        name: Merge staging into prod
+        run: |
+          git remote update
+          git config --global user.name "bloodbot"
+          git fetch origin staging:staging
+          git merge staging
+          git push
