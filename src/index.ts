@@ -1,1 +1,3 @@
-export * from './healthcheck';
+import { healthcheck } from './healthcheck';
+
+export { healthcheck };

@@ -25,6 +25,7 @@ const config: Config.InitialOptions = {
     // Ignore Coverage For these Files
     '!src/host.ts',
     '!src/**/index.ts',
+    '!src/__tests__/express/Express.util.ts',
   ],
   coverageReporters: ['html', 'json', 'text'],
   reporters: ['default'],

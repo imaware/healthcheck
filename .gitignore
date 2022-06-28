@@ -109,3 +109,5 @@ dist
 
 # @imaware/fastify-docs-generator files
 _auto-generated/**
+
+server/**
