@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout prod
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v2.4.2
         with:
           ref: 'prod'
           token: ${{ secrets.BOT_TOKEN }}
