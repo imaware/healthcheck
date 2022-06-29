@@ -106,11 +106,3 @@ Healthcheck will check each dependency to check if service is up.
     },
   };
   ```
-
-### Credits
-
-This package was created with Cookiecutter and the `imaware/imaware-microservice-template` project template.
-
-[Cookiecutter](https://github.com/cookiecutter/cookiecutter)
-
-[`imaware/imaware-microservice-template`](https://github.com/imaware/imaware-microservice-template)
