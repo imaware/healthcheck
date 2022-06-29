@@ -1,4 +1,4 @@
-# Imaware Healthcheck
+# imaware Healthcheck
 
 Reuseable healthcheck package to be used by fastify servers and express servers.
 
