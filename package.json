@@ -76,7 +76,7 @@
   "resolutions": {
     "ansi-regex": "^5.0.1",
     "json-schema": "^0.4.0",
-    "markdown-it": "^12.3.2",
+    "markdown-it": "^14.0.0",
     "node-forge": ">=1.3.0",
     "marked": "^4.0.10",
     "minimist": ">=1.2.6"
